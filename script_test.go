@@ -5,39 +5,6 @@ import (
 	"unicode"
 )
 
-func TestDetectScripts(t *testing.T) {
-	tests := map[string][]*unicode.RangeTable{
-		"Привет! Текст на русском with some English.": []*unicode.RangeTable{unicode.Cyrillic, unicode.Latin},
-		"Russian word любовь means love.":             []*unicode.RangeTable{unicode.Cyrillic, unicode.Latin},
-		"Это текст с одним латинским sимволом":        []*unicode.RangeTable{unicode.Cyrillic},
-	}
-
-	for text, want := range tests {
-		got := DetectScripts(text, 10)
-
-		t.Log(text, got)
-		continue
-
-		if isScriptSliceEqual(want, got) {
-			t.Fatalf("%s want %s got %s", text, want, got)
-		}
-	}
-}
-
-func isScriptSliceEqual(s1 []*unicode.RangeTable, s2 []*unicode.RangeTable) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-
-	for i := 0; i < len(s1); i++ {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
 func Test_DetectScript(t *testing.T) {
 	tests := map[string]*unicode.RangeTable{
 		"123456789-=?":                                                  nil,

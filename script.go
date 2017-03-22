@@ -84,7 +84,7 @@ func DetectScripts(text string, minPercentage int) []*unicode.RangeTable {
 	result := []*unicode.RangeTable{}
 	for _, script := range scriptCounter {
 		if *script.count == 0 {
-			break
+			continue
 		}
 
 		percentage := int(float64(*script.count) / float64(length) * 100)
