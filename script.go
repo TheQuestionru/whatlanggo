@@ -1,6 +1,9 @@
 package whatlanggo
 
-import "unicode"
+import (
+	"unicode"
+	"unicode/utf8"
+)
 
 type scriptCounter struct {
 	checkFunc func(r rune) bool
@@ -34,6 +37,65 @@ var Scripts = map[*unicode.RangeTable]string{
 	unicode.Myanmar:    "Myanmar",
 	unicode.Sinhala:    "Sinhala",
 	unicode.Khmer:      "Khmer",
+}
+
+//DetectScripts return range of scripts found in text bigger than minimum percentage
+func DetectScripts(text string, minPercentage int) []*unicode.RangeTable {
+	scriptCounter := []scriptCounter{
+		{isLatin, unicode.Latin, new(int)},
+		{isCyrillic, unicode.Cyrillic, new(int)},
+		{isArabic, unicode.Arabic, new(int)},
+		{isDevanagari, unicode.Devanagari, new(int)},
+		{isHiragana, unicode.Hiragana, new(int)},
+		{isKatakana, unicode.Katakana, new(int)},
+		{isEthiopic, unicode.Ethiopic, new(int)},
+		{isHebrew, unicode.Hebrew, new(int)},
+		{isBengali, unicode.Bengali, new(int)},
+		{isGeorgian, unicode.Georgian, new(int)},
+		{isHan, unicode.Han, new(int)},
+		{isHangul, unicode.Hangul, new(int)},
+		{isGreek, unicode.Greek, new(int)},
+		{isKannada, unicode.Kannada, new(int)},
+		{isTamil, unicode.Tamil, new(int)},
+		{isThai, unicode.Thai, new(int)},
+		{isGujarati, unicode.Gujarati, new(int)},
+		{isGurmukhi, unicode.Gurmukhi, new(int)},
+		{isTelugu, unicode.Telugu, new(int)},
+		{isMalayalam, unicode.Malayalam, new(int)},
+		{isOriya, unicode.Oriya, new(int)},
+		{isMyanmar, unicode.Myanmar, new(int)},
+		{isSinhala, unicode.Sinhala, new(int)},
+		{isKhmer, unicode.Khmer, new(int)},
+	}
+
+	for _, ch := range text {
+		if isStopChar(ch) {
+			continue
+		}
+
+		for _, sc := range scriptCounter {
+			if sc.checkFunc(ch) {
+				*sc.count++
+			}
+		}
+	}
+
+	length := utf8.RuneCountInString(text)
+	result := []*unicode.RangeTable{}
+	for _, script := range scriptCounter {
+		if *script.count == 0 {
+			break
+		}
+
+		percentage := int(float64(*script.count) / float64(length) * 100)
+		if int(percentage) < minPercentage {
+			continue
+		}
+
+		result = append(result, script.script)
+	}
+
+	return result
 }
 
 //DetectScript returns only the script of the given text.
